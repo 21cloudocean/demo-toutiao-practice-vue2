@@ -6,8 +6,8 @@
 </template>
 
 <script>
-// import request.js
-import request from '@/utils/request.js'
+// 按需导入API接口
+import { getArticleListAPI } from '@/api/articleAPI.js'
 export default {
   name: 'Home',
   data() {
@@ -25,13 +25,7 @@ export default {
     // 封装获取列表数据的方法
     async initArticleList() {
       // 发起GET请求，获取文章的列表数据
-      const { data: res } = await request.get('/articles', {
-        // 请求参数
-        params: {
-          _page: this.page,
-          _limit: this.limit
-        }
-      })
+      const { data: res } = await getArticleListAPI(this.page, this.limit)
       console.log(res)
     }
   }
