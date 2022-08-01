@@ -2,12 +2,19 @@
   <div class="home-container">
     <!-- Header -->
     <van-nav-bar title="黑马头条" fixed />
+
+    <!-- 导入、注册并使用ArticleInfo 组件-->
+    <p>{{ artList.length }}</p>
+    <ArticleInfo v-for="item in artList" :key="item.id"></ArticleInfo>
   </div>
 </template>
 
 <script>
 // 按需导入API接口
 import { getArticleListAPI } from '@/api/articleAPI.js'
+// 导入需要的组件
+import ArticleInfo from '@/components/Article/ArticleInfo.vue'
+
 export default {
   name: 'Home',
   data() {
@@ -15,7 +22,9 @@ export default {
       // 页码值
       page: 1,
       // 每页有多少数据
-      limit: 10
+      limit: 10,
+      // 文章的数组
+      artList: []
     }
   },
   created() {
@@ -26,8 +35,11 @@ export default {
     async initArticleList() {
       // 发起GET请求，获取文章的列表数据
       const { data: res } = await getArticleListAPI(this.page, this.limit)
-      console.log(res)
+      this.artList = res
     }
+  },
+  components: {
+    ArticleInfo
   }
 }
 </script>
