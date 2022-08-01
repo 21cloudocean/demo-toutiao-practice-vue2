@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 路由占位符 -->
-
+    <router-view></router-view>
     <!-- Tabbar -->
     <van-tabbar route>
       <van-tabbar-item to="/" icon="home-o">首页</van-tabbar-item>
