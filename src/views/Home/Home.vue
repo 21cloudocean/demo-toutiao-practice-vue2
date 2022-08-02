@@ -4,22 +4,28 @@
     <van-nav-bar title="黑马头条" fixed />
 
     <!-- 导入、注册并使用ArticleInfo 组件-->
-    <van-list
-      v-model="loading"
-      :finished="finished"
-      finished-text="没有更多了"
-      @load="onLoad"
+    <van-pull-refresh
+      v-model="isLoading"
+      :disabled="finished"
+      @refresh="onRefresh"
     >
-      <ArticleInfo
-        v-for="item in artList"
-        :key="item.id"
-        :title="item.title"
-        :author="item.aut_name"
-        :cmt-count="item.comm_count"
-        :time="item.pubdate"
-        :cover="item.cover"
-      ></ArticleInfo>
-    </van-list>
+      <van-list
+        v-model="loading"
+        :finished="finished"
+        finished-text="没有更多了"
+        @load="onLoad"
+      >
+        <ArticleInfo
+          v-for="item in artList"
+          :key="item.id"
+          :title="item.title"
+          :author="item.aut_name"
+          :cmt-count="item.comm_count"
+          :time="item.pubdate"
+          :cover="item.cover"
+        ></ArticleInfo>
+      </van-list>
+    </van-pull-refresh>
   </div>
 </template>
 
@@ -44,7 +50,9 @@ export default {
       // 为了让它不至于一进页面就加载，把它设为true。
       loading: true,
       // 所有数据是否加载完毕了，如果没有更多数据了，一定要把finished改成true
-      finished: false
+      finished: false,
+      // 是否正在下拉刷新
+      isLoading: false
     }
   },
   created() {
@@ -52,13 +60,20 @@ export default {
   },
   methods: {
     // 封装获取列表数据的方法
-    async initArticleList() {
+    async initArticleList(isRefresh) {
       // 发起GET请求，获取文章的列表数据
       const { data: res } = await getArticleListAPI(this.page, this.limit)
-      // 如果是上拉加载更多,那么:
-      // this.artList = [旧数据在前, 新数据在后]
-      this.artList = [...this.artList, ...res]
-      this.loading = false
+      if (isRefresh) {
+        // 证明是下拉刷新,新数据在前,旧数据在后
+        this.artList = [...res, ...this.artList]
+        this.isLoading = false
+      } else {
+        // 证明是上拉加载更多
+        // 如果是上拉加载更多,那么:
+        // this.artList = [旧数据在前, 新数据在后]
+        this.artList = [...this.artList, ...res]
+        this.loading = false
+      }
       if (res.length === 0) {
         // 证明没有下一页数据了,直接把finished改为true,表示数据加载完了
         this.finished = true
@@ -71,6 +86,14 @@ export default {
       this.page++
       // 2 重新请求接口获取数据
       this.initArticleList()
+    },
+    // 下拉刷新的处理函数
+    onRefresh() {
+      console.log('触发了onRefresh')
+      // 1 让页码值+1
+      this.page++
+      // 2 重新请求接口获取数据
+      this.initArticleList(true)
     }
   },
   components: {
